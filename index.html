@@ -276,7 +276,7 @@ h1 { font-family: var(--font-display); font-weight: 700; font-size: 26px; line-h
         <div class="field">
           <label for="f-phone">เบอร์โทรศัพท์</label>
           <input id="f-phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="12" placeholder="08x-xxx-xxxx">
-          <div class="err" id="err-phone" hidden>กรุณากรอกเบอร์โทร 9–10 หลัก ขึ้นต้นด้วย 0</div>
+          <div class="err" id="err-phone" hidden>กรุณากรอกเบอร์มือถือให้ครบ 10 หลัก เช่น 081-234-5678</div>
         </div>
         <div class="field">
           <label for="f-note">หมายเหตุถึงคลินิก (ไม่บังคับ)</label>
@@ -572,7 +572,7 @@ function validate() {
   }
   const name = $('f-name').value.trim();
   const phone = $('f-phone').value.replace(/\D/g, '');
-  const okName = name.length > 0; const okPhone = /^0\d{8,9}$/.test(phone);
+  const okName = name.length > 0; const okPhone = /^0[689]\d{8}$/.test(phone); // เบอร์มือถือ 10 หลัก
   $('err-name').hidden = okName; $('err-phone').hidden = okPhone;
   if (!okName) $('f-name').focus(); else if (!okPhone) $('f-phone').focus();
   return okName && okPhone ? { name, phone, note: $('f-note').value.trim() } : null;
