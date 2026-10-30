@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>จองคิวคลินิก</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@500;600;700&family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600&display=swap">
+<style>
+/* Layout: one narrow column of numbered booking steps over a calm jade-grey ground, with a sticky confirm bar */
+:root {
+  --bg: #F7F1E8;
+  --surface: #FFFFFF;
+  --ink: #4A3B2D;
+  --muted: #7A6A56;
+  --line: #D8CDBF;
+  --brand: #E5DAC4;          /* สีหลัก (จาก Figma) */
+  --brand-ink: #4A3B2D;      /* ตัวอักษรบนพื้นสีหลัก */
+  --brand-soft: #EFE3D4;
+  --brand-strong: #8A6B4E;   /* ตัวเลขขั้นตอน ไอคอน และเส้นโฟกัส */
+  --hatch: #CDBB9C;
+  --danger: #A63D2C;
+  --admin: #7A4E12;
+  --admin-soft: #F6EBD8;
+  --scrim: rgba(13, 26, 23, .45);
+  --font-display: "Anuphan", "IBM Plex Sans Thai Looped", "Noto Sans Thai", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans Thai Looped", "Noto Sans Thai Looped", "Noto Sans Thai", system-ui, sans-serif;
+  --r: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1A1612; --surface: #241F19; --ink: #F1E8DA; --muted: #B3A48F; --line: #3A3128;
+    --brand: #E5DAC4; --brand-ink: #3A2E22; --brand-soft: #3A3027; --brand-strong: #E5DAC4; --hatch: #6B5B48;
+    --danger: #E58A76; --admin: #E8BE7A; --admin-soft: #33281A; --scrim: rgba(0, 0, 0, .6); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1A1612; --surface: #241F19; --ink: #F1E8DA; --muted: #B3A48F; --line: #3A3128;
+  --brand: #E5DAC4; --brand-ink: #3A2E22; --brand-soft: #3A3027; --brand-strong: #E5DAC4; --hatch: #6B5B48;
+  --danger: #E58A76; --admin: #E8BE7A; --admin-soft: #33281A; --scrim: rgba(0, 0, 0, .6); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--brand-strong); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.wrap { max-width: 560px; margin: 0 auto; padding-inline: 16px; padding-block: 0 120px; }
+
+/* header */
+.top { padding-block: 22px 8px; display: grid; gap: 14px; }
+.brandrow { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.logo { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex: none; background: #fff; }
+.eyebrow { font-size: 13px; letter-spacing: .04em; color: var(--muted); }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: 26px; line-height: 1.2; margin: 2px 0 0; text-wrap: balance; }
+.tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
+.tabs button { border: 0; background: none; border-radius: 999px; padding: 8px 4px; font-weight: 500; color: var(--muted); font-size: 15px; }
+.tabs button[aria-selected="true"] { background: var(--brand); color: var(--brand-ink); }
+.tabs button#tab-admin[aria-selected="true"] { background: var(--admin); color: var(--surface); }
+.admin-flag { font-size: 13.5px; color: var(--admin); background: var(--admin-soft); border-radius: 10px; padding: 8px 12px; }
+
+/* steps */
+.step { padding-block: 18px 6px; display: grid; gap: 12px; }
+.step h2 { font-family: var(--font-display); font-weight: 600; font-size: 18px; margin: 0; display: flex; align-items: center; gap: 10px; }
+.num { width: 26px; height: 26px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 14px; background: var(--brand-soft); color: var(--brand-strong); flex: none; }
+.hint { margin: 0; font-size: 14px; color: var(--muted); }
+
+/* services */
+.services { display: grid; gap: 10px; }
+.doc-h { font-size: 13.5px; font-weight: 500; color: var(--muted); letter-spacing: .03em; padding-top: 6px; }
+.doc-h:first-child { padding-top: 0; }
+.svc {
+  text-align: left; background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--r);
+  padding: 14px 16px; display: grid; gap: 10px;
+}
+.svc[aria-pressed="true"] { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand); }
+.svc-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.svc-name { font-weight: 600; font-size: 17px; }
+.svc-dur { font-size: 14px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.svc-detail { font-size: 14px; color: var(--muted); margin-top: -6px; }
+.phasebar { display: flex; gap: 3px; height: 8px; }
+.phasebar span { border-radius: 4px; background: var(--brand); }
+.phasebar span.wait { background: repeating-linear-gradient(135deg, var(--hatch) 0 4px, transparent 4px 7px); border: 1px solid var(--hatch); }
+.phaselegend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--muted); }
+
+/* patients (admin) */
+.contacts { display: grid; gap: 8px; }
+.contact {
+  display: flex; align-items: center; gap: 12px; text-align: left; width: 100%;
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px;
+}
+.contact[aria-pressed="true"] { border-color: var(--admin); box-shadow: 0 0 0 3px var(--admin-soft); }
+.av { width: 36px; height: 36px; border-radius: 50%; flex: none; display: grid; place-items: center; background: var(--admin-soft); color: var(--admin); font-weight: 600; }
+.ct { flex: 1; min-width: 0; display: grid; line-height: 1.35; }
+.ct b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ct small { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ago { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+
+/* days */
+.days { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 8px; margin-inline: -2px; scroll-snap-type: x proximity; scrollbar-width: none; }
+.days::-webkit-scrollbar { display: none; }
+/* ปุ่มเลื่อนวันซ้าย/ขวา แสดงเฉพาะคอมพิวเตอร์ที่ใช้เมาส์ (มือถือใช้ปัดนิ้วเหมือนเดิม) */
+.dayscroll { position: relative; min-width: 0; }
+.dnav {
+  display: none; position: absolute; top: calc(50% - 3px); transform: translateY(-50%); z-index: 2;
+  width: 34px; height: 34px; padding: 0; border-radius: 50%; place-items: center;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  box-shadow: 0 2px 8px rgba(74, 59, 45, .18);
+}
+.dnav.prev { left: -8px; }
+.dnav.next { right: -8px; }
+@media (hover: hover) and (pointer: fine) { .dnav:not(:disabled) { display: grid; } }
+.dayscroll:has(.days[hidden]) .dnav { display: none !important; }
+.day {
+  flex: none; width: 58px; padding: 8px 0 7px; border-radius: 12px; border: 1.5px solid var(--line);
+  background: var(--surface); display: grid; justify-items: center; gap: 0; scroll-snap-align: start;
+  font-variant-numeric: tabular-nums;
+}
+.day .dw { font-size: 12.5px; color: var(--muted); }
+.day .dd { font-family: var(--font-display); font-weight: 600; font-size: 20px; line-height: 1.3; }
+.day .dm { font-size: 11.5px; color: var(--muted); }
+.day:disabled { opacity: .38; cursor: default; background: transparent; }
+.day[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
+.day[aria-pressed="true"] .dw, .day[aria-pressed="true"] .dm { color: var(--brand-ink); }
+.datelabel { font-size: 14px; color: var(--muted); margin: -4px 0 0; }
+
+/* times */
+.tgroup { display: grid; gap: 8px; }
+.tgroup + .tgroup { margin-top: 6px; }
+.tlabel { font-size: 13px; color: var(--muted); letter-spacing: .03em; }
+.times { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 8px; }
+.time {
+  border: 1.5px solid var(--line); background: var(--surface); border-radius: 10px; padding: 7px 0 6px;
+  display: grid; justify-items: center; font-variant-numeric: tabular-nums; line-height: 1.25;
+}
+.time b { font-weight: 600; font-size: 16px; }
+.time small { font-size: 11.5px; color: var(--muted); }
+.time[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
+.time[aria-pressed="true"] small { color: var(--brand-ink); }
+
+/* form */
+.field { display: grid; gap: 6px; }
+.field label { font-size: 14px; font-weight: 500; }
+.field input, .field textarea {
+  width: 100%; border: 1.5px solid var(--line); background: var(--surface); border-radius: 10px; padding: 11px 12px;
+}
+.field input:focus, .field textarea:focus { border-color: var(--brand-strong); outline: none; box-shadow: 0 0 0 3px var(--brand-soft); }
+.field textarea { min-height: 70px; resize: vertical; }
+.field .err { font-size: 13px; color: var(--danger); }
+
+/* bottom bar */
+.bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  background: var(--surface); border-top: 1px solid var(--line);
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+}
+.bar-in { max-width: 560px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+.bar .sum { flex: 1; min-width: 0; font-size: 14px; line-height: 1.35; }
+.bar .sum b { display: block; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar .sum span { color: var(--muted); font-variant-numeric: tabular-nums; }
+.btn {
+  border: 0; border-radius: 12px; background: var(--brand); color: var(--brand-ink);
+  font-weight: 600; padding: 12px 20px; white-space: nowrap; text-align: center; text-decoration: none;
+}
+.btn:disabled { opacity: .5; cursor: default; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+.btn.danger { background: var(--danger); color: var(--surface); }
+.btn.block { width: 100%; display: block; }
+
+/* cards: done + my bookings */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 10px; }
+.rows { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 0; font-size: 15px; }
+.rows dt { color: var(--muted); }
+.rows dd { margin: 0; font-weight: 500; font-variant-numeric: tabular-nums; min-width: 0; }
+.done { padding-block: 32px 0; display: grid; gap: 16px; }
+.done .tick { width: 56px; height: 56px; border-radius: 50%; background: var(--brand-soft); color: var(--brand-strong); display: grid; place-items: center; }
+.done h2 { font-family: var(--font-display); font-size: 24px; margin: 0; }
+.note { font-size: 14px; color: var(--muted); margin: 0; }
+.note.warn { color: var(--ink); background: var(--admin-soft); border-radius: 10px; padding: 10px 12px; }
+.actions { display: grid; gap: 10px; }
+.mylist { display: grid; gap: 12px; padding-block: 18px 0; }
+.bk-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.bk-name { font-weight: 600; font-size: 17px; }
+.bk-id { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bk-when { font-size: 15px; font-variant-numeric: tabular-nums; }
+.empty { text-align: center; color: var(--muted); padding: 32px 8px; font-size: 15px; }
+
+/* loading */
+.skel { height: 74px; border-radius: var(--r); background: linear-gradient(90deg, var(--surface), var(--line), var(--surface)); background-size: 200% 100%; animation: sh 1.2s infinite linear; opacity: .7; }
+@keyframes sh { to { background-position: -200% 0; } }
+.loading { font-size: 14px; color: var(--muted); }
+
+/* sheet + toast */
+.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 20; display: grid; align-items: end; }
+.sheet {
+  background: var(--surface); border-radius: 18px 18px 0 0; max-width: 560px; width: 100%; margin: 0 auto;
+  padding: 20px 16px calc(16px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 14px;
+}
+.sheet h3 { font-family: var(--font-display); margin: 0; font-size: 20px; }
+.sheet .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.toast {
+  position: fixed; left: 16px; right: 16px; bottom: calc(92px + env(safe-area-inset-bottom, 0px)); z-index: 30;
+  max-width: 528px; margin: 0 auto; background: var(--ink); color: var(--bg);
+  padding: 12px 14px; border-radius: 12px; font-size: 14.5px;
+}
+.demo-flag { font-size: 12.5px; color: var(--muted); border: 1px dashed var(--line); border-radius: 8px; padding: 6px 10px; }
+@media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="brandrow">
+        <img class="logo" src="logo.jpg" alt="โลโก้ เจี้ยนหลินเวลเนส" width="32" height="32">
+        <div class="eyebrow">จองคิวออนไลน์</div>
+      </div>
+      <h1 id="clinicName">เจี้ยนหลินเวลเนส สหคลินิก</h1>
+    </div>
+    <div class="demo-flag" id="demoFlag" hidden>โหมดตัวอย่าง: เวลาว่างและรายชื่อคนไข้เป็นข้อมูลสมมติ ยังไม่ได้เชื่อมกับปฏิทินจริง</div>
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tab-book" aria-selected="true" data-tab="book">จองคิว</button>
+      <button role="tab" id="tab-my" aria-selected="false" data-tab="my">คิวของฉัน</button>
+      <button role="tab" id="tab-admin" aria-selected="false" data-tab="admin" hidden>จองแทนคนไข้</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="view-book">
+      <div class="step" id="step-patient" hidden>
+        <div class="admin-flag">โหมดแอดมิน: คิวที่จองจะเป็นของคนไข้ที่เลือก และระบบส่ง LINE ยืนยันถึงคนไข้</div>
+        <h2><span class="num">1</span>เลือกคนไข้</h2>
+        <div class="field">
+          <label for="f-search" class="sr">ค้นหาคนไข้</label>
+          <input id="f-search" type="search" placeholder="ค้นหาชื่อ LINE ชื่อจริง หรือเบอร์โทร" autocomplete="off">
+        </div>
+        <div class="contacts" id="contacts"></div>
+      </div>
+
+      <div class="step" id="step-service">
+        <h2><span class="num">1</span>เลือกบริการ</h2>
+        <div class="services" id="services"><div class="skel"></div><div class="skel"></div></div>
+      </div>
+
+      <div class="step" id="step-date" hidden>
+        <h2><span class="num">2</span>เลือกวัน</h2>
+        <div class="loading" id="daysLoading">กำลังดูช่วงเวลาว่าง…</div>
+        <div class="dayscroll">
+          <button type="button" class="dnav prev" id="daysPrev" aria-label="ดูวันก่อนหน้า" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+          <div class="days" id="days" hidden></div>
+          <button type="button" class="dnav next" id="daysNext" aria-label="ดูวันถัดไป" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+        </div>
+        <p class="hint" id="noDays" hidden>ช่วงนี้คิวเต็มหรือแพทย์ยังไม่เปิดรับคิวสำหรับบริการนี้ กรุณาติดต่อคลินิกทางแชท</p>
+      </div>
+
+      <div class="step" id="step-time" hidden>
+        <h2><span class="num">3</span>เลือกเวลา</h2>
+        <p class="datelabel" id="dateLabel"></p>
+        <div id="times"></div>
+      </div>
+
+      <form class="step" id="step-form" hidden novalidate>
+        <h2><span class="num">4</span>ข้อมูลผู้จอง</h2>
+        <div class="field">
+          <label for="f-name">ชื่อ-นามสกุล</label>
+          <input id="f-name" name="name" autocomplete="name" maxlength="60" placeholder="เช่น สมใจ ใจดี">
+          <div class="err" id="err-name" hidden>กรุณากรอกชื่อ</div>
+        </div>
+        <div class="field">
+          <label for="f-phone">เบอร์โทรศัพท์</label>
+          <input id="f-phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="12" placeholder="08x-xxx-xxxx">
+          <div class="err" id="err-phone" hidden>กรุณากรอกเบอร์โทร 9–10 หลัก ขึ้นต้นด้วย 0</div>
+        </div>
+        <div class="field">
+          <label for="f-note">หมายเหตุถึงคลินิก (ไม่บังคับ)</label>
+          <textarea id="f-note" name="note" maxlength="300" placeholder="เช่น ประวัติแพ้ยา หรือบริเวณที่ต้องการทำ"></textarea>
+        </div>
+      </form>
+    </section>
+
+    <section id="view-my" hidden>
+      <div class="mylist" id="myList"></div>
+    </section>
+
+    <section id="view-done" class="done" hidden>
+      <div class="tick" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      </div>
+      <h2 id="doneTitle">จองคิวสำเร็จ</h2>
+      <div class="card"><dl class="rows" id="doneRows"></dl></div>
+      <p class="note" id="doneNote"></p>
+      <div class="actions">
+        <a class="btn block" id="addFriend" hidden>เพิ่ม LINE คลินิกเป็นเพื่อน</a>
+        <button class="btn block" id="closeBtn" type="button">เสร็จสิ้น</button>
+        <button class="btn ghost block" id="againBtn" type="button">จองคิวอื่นเพิ่ม</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="bar" id="bar" hidden>
+  <div class="bar-in">
+    <div class="sum" id="sum"></div>
+    <button class="btn" id="submit" type="button">ยืนยันการจอง</button>
+  </div>
+</div>
+
+<div class="scrim" id="sheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <h3 id="sheetTitle">ยกเลิกคิวนี้?</h3>
+    <dl class="rows" id="sheetRows"></dl>
+    <div class="row2">
+      <button class="btn ghost" id="sheetKeep" type="button">เก็บคิวไว้</button>
+      <button class="btn danger" id="sheetCancel" type="button">ยกเลิกคิว</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+/* ===================== ตั้งค่า (แก้ 3 บรรทัดนี้) ===================== */
+const APP = {
+  LIFF_ID: '2011950663-ldFgSdEj',      // เช่น '2001234567-AbCdEfGh'
+  API_URL: 'https://script.google.com/macros/s/AKfycbzbyUSh2kY_qRaWyL0YvtMF4K8W6eI3O_eeIztekrPUsi6bxOBmA26d9CiNyOxi4c7RZQ/exec',      // Web App URL จาก Apps Script ลงท้ายด้วย /exec
+  OA_BASIC_ID: '@506jevmf',  // LINE ID ของคลินิก เช่น '@myclinic' (ใช้ปุ่มเพิ่มเพื่อน)
+};
+/* ถ้ายังไม่ใส่ API_URL หรือเปิดด้วย ?demo หน้าจะทำงานด้วยข้อมูลตัวอย่าง */
+const DEMO = !APP.API_URL || new URLSearchParams(location.search).has('demo');
+
+const TH_DOW = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+const TH_DOW_FULL = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+const TH_MON = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+const STEP_IDS = ['step-patient', 'step-service', 'step-date', 'step-time', 'step-form'];
+
+const $ = (id) => document.getElementById(id);
+const state = {
+  cfg: null, mode: 'self', svc: null, days: {}, date: null, time: null,
+  contact: null, contacts: [], idToken: null, inClient: false, busy: false,
+};
+
+/* ---------- date helpers (เวลาไทย) ---------- */
+function todayKey() { return new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10); }
+function addDays(key, n) { const d = new Date(key + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+function parts(key) { const d = new Date(key + 'T00:00:00Z'); return { wd: d.getUTCDay(), d: d.getUTCDate(), m: d.getUTCMonth(), y: d.getUTCFullYear() }; }
+function dateLabel(key) { const p = parts(key); return `${TH_DOW_FULL[p.wd]} ${p.d} ${TH_MON[p.m]} ${p.y + 543}`; }
+function shortDate(key) { const p = parts(key); return `${TH_DOW[p.wd]} ${p.d} ${TH_MON[p.m]}`; }
+function toMin(t) { const [h, m] = t.split(':').map(Number); return h * 60 + m; }
+function fromMin(x) { return String(Math.floor(x / 60)).padStart(2, '0') + ':' + String(x % 60).padStart(2, '0'); }
+function endOf(t) { return fromMin(toMin(t) + state.svc.durationMin); }
+function ago(ms) {
+  if (!ms) return '';
+  const m = Math.max(0, Math.round((Date.now() - ms) / 60000));
+  if (m < 2) return 'เมื่อสักครู่';
+  if (m < 60) return `${m} นาทีที่แล้ว`;
+  if (m < 1440) return `${Math.round(m / 60)} ชม.ที่แล้ว`;
+  return `${Math.round(m / 1440)} วันที่แล้ว`;
+}
+function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function doctorName(svc) { const d = state.cfg.doctors.find((x) => x.id === svc.doctorId); return d ? d.name : ''; }
+function patientLabel() { const c = state.contact; return !c ? '' : c.none ? 'คนไข้ไม่มี LINE' : (c.name || c.displayName); }
+
+/* ---------- API ---------- */
+async function api(action, data = {}) {
+  if (DEMO) return demoApi(action, data);
+  const res = await fetch(APP.API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // ไม่ทำให้เกิด CORS preflight
+    body: JSON.stringify(Object.assign({ action, idToken: state.idToken }, data)),
+  });
+  const j = await res.json();
+  if (!j.ok) { const e = new Error(j.error || 'เกิดข้อผิดพลาด'); e.code = j.code; throw e; }
+  return j;
+}
+
+function loadScript(src) {
+  return new Promise((ok, fail) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => fail(new Error('โหลด LINE ไม่สำเร็จ กรุณาตรวจสัญญาณอินเทอร์เน็ต')); document.head.appendChild(s); });
+}
+
+/* ---------- boot ---------- */
+async function boot() {
+  try {
+    if (DEMO) {
+      $('demoFlag').hidden = false;
+    } else {
+      await loadScript('https://static.line-scdn.net/liff/edge/2/sdk.js');
+      await liff.init({ liffId: APP.LIFF_ID });
+      if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
+      state.inClient = liff.isInClient();
+      state.idToken = liff.getIDToken();
+    }
+    state.cfg = await api('config');
+    $('clinicName').textContent = state.cfg.clinicName;
+    document.title = 'จองคิว · ' + state.cfg.clinicName;
+    $('tab-admin').hidden = !state.cfg.isAdmin;
+    renderServices();
+    restoreForm();
+    const view = new URLSearchParams(location.search).get('view');
+    if (view === 'my') switchTab('my');
+    if (view === 'admin' && state.cfg.isAdmin) switchTab('admin');
+  } catch (e) {
+    $('services').innerHTML = `<p class="hint">${esc(e.message || 'เปิดหน้าจองไม่สำเร็จ')} กรุณาปิดแล้วเปิดใหม่อีกครั้ง</p>`;
+  }
+}
+
+/* ---------- step numbers + reset ---------- */
+function renumber() {
+  STEP_IDS.filter((id) => id !== 'step-patient' || state.mode === 'admin')
+    .forEach((id, i) => { $(id).querySelector('.num').textContent = i + 1; });
+}
+
+function resetBooking() {
+  state.svc = null; state.date = null; state.time = null; state.contact = null;
+  if (state.cfg) renderServices(); // รายการบริการต่างกันระหว่างแท็บจองกับแท็บแอดมิน
+  $('services').querySelectorAll('.svc').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+  $('step-date').hidden = true; $('step-time').hidden = true; $('step-form').hidden = true;
+  $('step-patient').hidden = state.mode !== 'admin';
+  ['f-name', 'f-phone', 'f-note'].forEach((id) => { $(id).value = ''; });
+  $('err-name').hidden = true; $('err-phone').hidden = true;
+  if (state.mode === 'admin') { $('f-search').value = ''; loadContacts(''); } else restoreForm();
+  renumber();
+  updateBar();
+}
+
+/* ---------- admin: patients ---------- */
+let searchTimer;
+async function loadContacts(q) {
+  $('contacts').innerHTML = '<div class="loading">กำลังโหลดรายชื่อ…</div>';
+  try {
+    const r = await api('contacts', { q });
+    state.contacts = r.contacts;
+    renderContacts();
+  } catch (e) { $('contacts').innerHTML = `<p class="hint">${esc(e.message)}</p>`; }
+}
+
+function renderContacts() {
+  const sel = state.contact;
+  const none = `<button type="button" class="contact" data-u="" aria-pressed="${!!(sel && sel.none)}">
+    <span class="av" aria-hidden="true">–</span>
+    <span class="ct"><b>คนไข้ไม่มี LINE</b><small>เช่น โทรมาจอง ระบบจะไม่ส่งข้อความยืนยัน</small></span></button>`;
+  const list = state.contacts.map((c) => `<button type="button" class="contact" data-u="${esc(c.userId)}" aria-pressed="${!!(sel && sel.userId === c.userId)}">
+    <span class="av" aria-hidden="true">${esc((c.displayName || c.name || '?').trim().charAt(0))}</span>
+    <span class="ct"><b>${esc(c.displayName || c.name || 'ไม่ทราบชื่อ')}</b><small>${esc([c.name, c.phone].filter(Boolean).join(' · ') || 'ยังไม่เคยจองคิว')}</small></span>
+    <span class="ago">${ago(c.lastSeen)}</span></button>`).join('');
+  const empty = state.contacts.length ? '' : `<p class="hint">${$('f-search').value ? 'ไม่พบรายชื่อที่ค้นหา' : 'ยังไม่มีคนไข้ทักเข้ามา ระบบเริ่มเก็บรายชื่อหลังเปิดใช้ webhook'}</p>`;
+  $('contacts').innerHTML = list + empty + none;
+  $('contacts').querySelectorAll('.contact').forEach((b) => b.addEventListener('click', () => pickContact(b.dataset.u)));
+}
+
+function pickContact(userId) {
+  const c = userId ? state.contacts.find((x) => x.userId === userId) : { none: true };
+  state.contact = c;
+  $('contacts').querySelectorAll('.contact').forEach((b) => b.setAttribute('aria-pressed', String(userId ? b.dataset.u === userId : b.dataset.u === '')));
+  $('f-name').value = c.none ? '' : (c.name || '');
+  $('f-phone').value = c.none ? '' : (c.phone || '');
+  updateBar();
+  if (!state.svc) $('step-service').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ---------- step: services ---------- */
+function renderServices() {
+  const card = (s) => {
+    const bar = s.phases.map((p) => `<span class="${p.doctor ? '' : 'wait'}" style="flex:${p.min}"></span>`).join('');
+    const legend = s.phases.length > 1
+      ? `<div class="phaselegend">${s.phases.map((p) => `<span>${esc(p.label)} ${p.min} นาที</span>`).join('')}</div>` : '';
+    return `<button type="button" class="svc" aria-pressed="false" data-id="${esc(s.id)}">
+      <div class="svc-head"><span class="svc-name">${esc(s.name)}</span><span class="svc-dur">${s.durationMin} นาที</span></div>
+      ${s.detail || s.adminOnly ? `<div class="svc-detail">${esc([s.detail, s.adminOnly ? 'เฉพาะแอดมินจองแทน' : ''].filter(Boolean).join(' · '))}</div>` : ''}
+      <div class="phasebar" aria-hidden="true">${bar}</div>${legend}
+    </button>`;
+  };
+  $('services').innerHTML = state.cfg.doctors.map((d) => {
+    // บริการ adminOnly แสดงเฉพาะแท็บแอดมิน (แท็บจองของแอดมินเองก็ไม่แสดง)
+    const list = state.cfg.services.filter((s) => s.doctorId === d.id && (!s.adminOnly || state.mode === 'admin'));
+    return list.length ? `<div class="doc-h">${esc(d.title ? d.title + ' · ' + d.name : d.name)}</div>${list.map(card).join('')}` : '';
+  }).join('');
+  $('services').querySelectorAll('.svc').forEach((b) => b.addEventListener('click', () => pickService(b.dataset.id)));
+}
+
+async function pickService(id) {
+  state.svc = state.cfg.services.find((s) => s.id === id);
+  state.date = null; state.time = null;
+  $('services').querySelectorAll('.svc').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.id === id)));
+  $('step-date').hidden = false; $('step-time').hidden = true; $('step-form').hidden = true;
+  $('days').hidden = true; $('noDays').hidden = true; $('daysLoading').hidden = false;
+  updateBar();
+  try {
+    const r = await api('availability', { serviceId: id, admin: state.mode === 'admin' });
+    if (!state.svc || state.svc.id !== id) return; // ผู้ใช้เปลี่ยนบริการระหว่างโหลด
+    state.days = r.days || {};
+    renderDays();
+    $('step-date').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) {
+    toast(e.message);
+  } finally {
+    $('daysLoading').hidden = true;
+  }
+}
+
+/* ---------- step: days ---------- */
+function renderDays() {
+  const start = todayKey();
+  const keys = Array.from({ length: state.cfg.horizonDays }, (_, i) => addDays(start, i));
+  const firstOpen = keys.find((k) => (state.days[k] || []).length);
+  if (!firstOpen) { $('noDays').hidden = false; $('days').hidden = true; return; }
+  $('days').innerHTML = keys.map((k) => {
+    const p = parts(k); const open = (state.days[k] || []).length > 0;
+    return `<button type="button" class="day" data-k="${k}" aria-pressed="false" ${open ? '' : 'disabled'} aria-label="${dateLabel(k)}${open ? '' : ' (ไม่มีคิวว่าง)'}">
+      <span class="dw">${TH_DOW[p.wd]}</span><span class="dd">${p.d}</span><span class="dm">${TH_MON[p.m]}</span></button>`;
+  }).join('');
+  $('days').hidden = false;
+  $('days').querySelectorAll('.day').forEach((b) => b.addEventListener('click', () => pickDate(b.dataset.k)));
+  pickDate(state.date && (state.days[state.date] || []).length ? state.date : firstOpen, true);
+  requestAnimationFrame(updateDayNav);
+}
+
+function pickDate(k, quiet) {
+  state.date = k; state.time = null;
+  $('days').querySelectorAll('.day').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.k === k)));
+  const sel = $('days').querySelector(`[data-k="${k}"]`);
+  if (sel && quiet) $('days').scrollLeft = Math.max(0, sel.offsetLeft - 60);
+  renderTimes();
+  $('step-form').hidden = true;
+  updateBar();
+}
+
+/* ---------- step: times ---------- */
+function renderTimes() {
+  const list = state.days[state.date] || [];
+  const groups = [['ช่วงเช้า', (t) => toMin(t) < 720], ['ช่วงบ่าย', (t) => toMin(t) >= 720 && toMin(t) < 1020], ['ช่วงเย็น', (t) => toMin(t) >= 1020]];
+  $('dateLabel').textContent = `${dateLabel(state.date)} · ${doctorName(state.svc)} · ว่าง ${list.length} ช่วงเวลา`;
+  $('times').innerHTML = groups.map(([label, fn]) => {
+    const ts = list.filter(fn);
+    if (!ts.length) return '';
+    return `<div class="tgroup"><div class="tlabel">${label}</div><div class="times">${ts.map((t) =>
+      `<button type="button" class="time" data-t="${t}" aria-pressed="false"><b>${t}</b><small>ถึง ${endOf(t)}</small></button>`).join('')}</div></div>`;
+  }).join('');
+  $('times').querySelectorAll('.time').forEach((b) => b.addEventListener('click', () => pickTime(b.dataset.t)));
+  $('step-time').hidden = false;
+}
+
+function pickTime(t) {
+  state.time = t;
+  $('times').querySelectorAll('.time').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.t === t)));
+  const firstTime = $('step-form').hidden;
+  $('step-form').hidden = false;
+  updateBar();
+  if (firstTime) $('step-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ---------- bar + submit ---------- */
+function updateBar() {
+  const ready = state.svc && state.date && state.time;
+  $('bar').hidden = !ready || $('view-book').hidden;
+  if (!ready) return;
+  const who = state.mode === 'admin' ? ` · ${esc(patientLabel() || 'ยังไม่เลือกคนไข้')}` : '';
+  $('sum').innerHTML = `<b>${esc(state.svc.name)}${who}</b><span>${shortDate(state.date)} · ${state.time}–${endOf(state.time)} น.</span>`;
+}
+
+function validate() {
+  if (state.mode === 'admin' && !state.contact) {
+    toast('กรุณาเลือกคนไข้ก่อน');
+    $('step-patient').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return null;
+  }
+  const name = $('f-name').value.trim();
+  const phone = $('f-phone').value.replace(/\D/g, '');
+  const okName = name.length > 0; const okPhone = /^0\d{8,9}$/.test(phone);
+  $('err-name').hidden = okName; $('err-phone').hidden = okPhone;
+  if (!okName) $('f-name').focus(); else if (!okPhone) $('f-phone').focus();
+  return okName && okPhone ? { name, phone, note: $('f-note').value.trim() } : null;
+}
+
+async function submit() {
+  if (state.busy) return;
+  const form = validate();
+  if (!form) return;
+  state.busy = true; $('submit').disabled = true; $('submit').textContent = 'กำลังจอง…';
+  const base = Object.assign({ serviceId: state.svc.id, date: state.date, time: state.time }, form);
+  try {
+    if (state.mode === 'admin') {
+      const r = await api('adminBook', Object.assign({ contactUserId: state.contact.none ? '' : state.contact.userId }, base));
+      showDone(r.booking, r.pushed, r.notified);
+    } else {
+      const r = await api('book', base);
+      saveForm(form);
+      showDone(r.booking, r.pushed, true);
+    }
+  } catch (e) {
+    toast(e.message);
+    if (e.code === 'SLOT_TAKEN') pickService(state.svc.id);
+  } finally {
+    state.busy = false; $('submit').disabled = false; $('submit').textContent = 'ยืนยันการจอง';
+  }
+}
+
+function rows(b, who) {
+  return (who ? `<dt>คนไข้</dt><dd>${esc(who)}</dd>` : '') +
+    `<dt>บริการ</dt><dd>${esc(b.serviceName)}</dd><dt>แพทย์</dt><dd>${esc(b.doctorName)}</dd>
+    <dt>วันที่</dt><dd>${esc(b.dateLabel)}</dd><dt>เวลา</dt><dd>${b.time}–${b.endTime} น.</dd><dt>รหัสจอง</dt><dd>${esc(b.id)}</dd>`;
+}
+
+/* ข้อความบอกเวลาเตือนนัด (ไม่พูดถึงถ้านัดอยู่ภายในช่วงเตือนแล้ว เพราะระบบจะไม่ส่งเตือนซ้ำ) */
+function remindNote(b) {
+  const m = state.cfg.reminderBeforeMin;
+  if (!m || Date.parse(`${b.date}T${b.time}:00+07:00`) - Date.now() <= m * 60000) return '';
+  return ` และจะส่งข้อความเตือนอีกครั้ง ${m % 60 ? m + ' นาที' : m / 60 + ' ชั่วโมง'}ก่อนเวลานัด`;
+}
+function setNote(text, warn) { $('doneNote').className = warn ? 'note warn' : 'note'; $('doneNote').textContent = text; }
+
+function showDone(b, pushed, notified) {
+  const admin = state.mode === 'admin';
+  $('view-book').hidden = true; $('view-my').hidden = true; $('view-done').hidden = false; $('bar').hidden = true;
+  $('doneTitle').textContent = admin ? 'จองแทนคนไข้สำเร็จ' : 'จองคิวสำเร็จ';
+  $('doneRows').innerHTML = rows(b, admin ? patientLabel() : '');
+  $('againBtn').textContent = admin ? 'จองให้คนไข้คนอื่น' : 'จองคิวอื่นเพิ่ม';
+  const friendLink = APP.OA_BASIC_ID ? 'https://line.me/R/ti/p/' + encodeURIComponent(APP.OA_BASIC_ID) : '';
+  $('addFriend').hidden = true;
+  if (admin) {
+    if (!notified) setNote('บันทึกคิวลงปฏิทินแล้ว คนไข้รายนี้ไม่มี LINE ระบบจึงไม่ได้ส่งข้อความยืนยัน');
+    else if (pushed) setNote(`ส่ง LINE ยืนยันถึง ${patientLabel()} แล้ว คนไข้ดูหรือยกเลิกคิวเองได้จากเมนู “คิวของฉัน”${remindNote(b)}`);
+    else setNote('บันทึกคิวลงปฏิทินแล้ว แต่ส่ง LINE ไม่สำเร็จ คนไข้อาจบล็อก LINE ของคลินิกไว้ กรุณาแจ้งรายละเอียดคิวทางแชท', true);
+  } else if (pushed || DEMO) {
+    setNote(DEMO ? `ในระบบจริง คนไข้จะได้รับข้อความยืนยันทาง LINE ทันที${remindNote(b)}`
+      : `ส่งรายละเอียดการจองไปที่แชท LINE ของคุณแล้ว${remindNote(b)}`);
+  } else {
+    setNote('ระบบบันทึกคิวแล้ว แต่ส่งข้อความยืนยันทาง LINE ไม่ได้ เพราะคุณยังไม่ได้เพิ่ม LINE ของคลินิกเป็นเพื่อน กรุณาเพิ่มเพื่อนเพื่อรับการแจ้งเตือนนัด', true);
+    if (friendLink) { $('addFriend').href = friendLink; $('addFriend').hidden = false; }
+  }
+  window.scrollTo({ top: 0 });
+}
+
+/* ---------- my bookings ---------- */
+async function loadMy() {
+  $('myList').innerHTML = '<div class="skel"></div>';
+  try {
+    const r = await api('my');
+    if (!r.bookings.length) {
+      $('myList').innerHTML = '<div class="empty">ยังไม่มีคิวที่จองไว้<br>กดแท็บ “จองคิว” เพื่อเลือกเวลา</div>';
+      return;
+    }
+    $('myList').innerHTML = r.bookings.map((b, i) => `
+      <div class="card">
+        <div class="bk-head"><span class="bk-name">${esc(b.serviceName)}</span><span class="bk-id">${esc(b.id)}</span></div>
+        <div class="bk-when">${esc(b.doctorName)}<br>${esc(b.dateLabel)} · ${b.time}–${b.endTime} น.</div>
+        ${b.canCancel ? `<button class="btn ghost" type="button" data-i="${i}">ยกเลิกคิว</button>`
+          : `<p class="note">ใกล้เวลานัดแล้ว หากต้องการเลื่อนหรือยกเลิก กรุณาติดต่อคลินิกทางแชท</p>`}
+      </div>`).join('');
+    $('myList').querySelectorAll('[data-i]').forEach((btn) => btn.addEventListener('click', () => askCancel(r.bookings[btn.dataset.i])));
+  } catch (e) {
+    $('myList').innerHTML = `<div class="empty">${esc(e.message)}</div>`;
+  }
+}
+
+let pendingCancel = null;
+function askCancel(b) { pendingCancel = b; $('sheetRows').innerHTML = rows(b); $('sheet').hidden = false; $('sheetKeep').focus(); }
+function closeSheet() { $('sheet').hidden = true; pendingCancel = null; }
+async function doCancel() {
+  if (!pendingCancel) return;
+  const b = pendingCancel;
+  $('sheetCancel').disabled = true; $('sheetCancel').textContent = 'กำลังยกเลิก…';
+  try {
+    await api('cancel', { bookingId: b.id });
+    closeSheet(); toast('ยกเลิกคิว ' + b.id + ' แล้ว'); loadMy();
+  } catch (e) { toast(e.message); }
+  finally { $('sheetCancel').disabled = false; $('sheetCancel').textContent = 'ยกเลิกคิว'; }
+}
+
+/* ---------- tabs, toast, form memory ---------- */
+function switchTab(tab) {
+  ['book', 'my', 'admin'].forEach((t) => $('tab-' + t).setAttribute('aria-selected', String(t === tab)));
+  $('view-done').hidden = true;
+  $('view-my').hidden = tab !== 'my';
+  $('view-book').hidden = tab === 'my';
+  if (tab === 'my') { $('bar').hidden = true; loadMy(); return; }
+  const mode = tab === 'admin' ? 'admin' : 'self';
+  if (mode !== state.mode) { state.mode = mode; resetBooking(); } else updateBar();
+}
+let toastTimer;
+function toast(msg) { $('toast').textContent = msg; $('toast').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('toast').hidden = true; }, 4200); }
+function saveForm(f) { try { localStorage.setItem('booking-contact', JSON.stringify({ name: f.name, phone: f.phone })); } catch (e) {} }
+function restoreForm() {
+  try { const f = JSON.parse(localStorage.getItem('booking-contact') || 'null'); if (f) { $('f-name').value = f.name || ''; $('f-phone').value = f.phone || ''; } } catch (e) {}
+}
+
+document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => switchTab(b.dataset.tab)));
+$('submit').addEventListener('click', submit);
+
+/* เลื่อนแถววันบนคอมพิวเตอร์: ปุ่มลูกศร + ล้อเมาส์ */
+function updateDayNav() {
+  const el = $('days'); const max = el.scrollWidth - el.clientWidth;
+  $('daysPrev').disabled = el.hidden || el.scrollLeft <= 2;
+  $('daysNext').disabled = el.hidden || el.scrollLeft >= max - 2;
+}
+$('days').addEventListener('scroll', updateDayNav, { passive: true });
+window.addEventListener('resize', updateDayNav);
+$('daysPrev').addEventListener('click', () => $('days').scrollBy({ left: -$('days').clientWidth * 0.8, behavior: 'smooth' }));
+$('daysNext').addEventListener('click', () => $('days').scrollBy({ left: $('days').clientWidth * 0.8, behavior: 'smooth' }));
+$('days').addEventListener('wheel', (e) => {
+  const el = $('days');
+  if (Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return;            // ทัชแพดเลื่อนแนวนอนได้เองอยู่แล้ว
+  const max = el.scrollWidth - el.clientWidth;
+  if ((e.deltaY < 0 && el.scrollLeft <= 0) || (e.deltaY > 0 && el.scrollLeft >= max - 1)) return; // สุดแถวแล้ว ให้หน้าเลื่อนลงตามปกติ
+  e.preventDefault();
+  el.scrollLeft += e.deltaY;
+}, { passive: false });
+$('step-form').addEventListener('submit', (e) => { e.preventDefault(); submit(); });
+$('f-search').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => loadContacts($('f-search').value.trim()), 300); });
+$('sheetKeep').addEventListener('click', closeSheet);
+$('sheetCancel').addEventListener('click', doCancel);
+$('sheet').addEventListener('click', (e) => { if (e.target === $('sheet')) closeSheet(); });
+$('againBtn').addEventListener('click', () => {
+  $('view-done').hidden = true; $('view-book').hidden = false;
+  if (state.mode === 'admin') { resetBooking(); window.scrollTo({ top: 0 }); return; }
+  state.time = null; if (state.svc) pickService(state.svc.id);
+});
+$('closeBtn').addEventListener('click', () => {
+  if (!DEMO && state.inClient) liff.closeWindow(); else switchTab(state.mode === 'admin' ? 'admin' : 'my');
+});
+
+/* ===================== ข้อมูลตัวอย่าง (โหมด demo) ===================== */
+const MIN = 60000;
+const demo = {
+  cfg: {
+    clinicName: 'เจี้ยนหลินเวลเนส สหคลินิก', horizonDays: 30, cancelBeforeHours: 3, isAdmin: true, reminderBeforeMin: 180,
+    doctors: [{ id: 'gp', name: 'นพ.กาญจน์สุธี', title: 'แพทย์ทั่วไป' }, { id: 'tcm', name: 'พจ.ปวริศรา', title: 'แพทย์แผนจีน' }],
+    services: [
+      { id: 'pen', doctorId: 'gp', name: 'โปรแกรมลดน้ำหนัก', detail: 'ใช้เวลาประมาณ 15 นาที', durationMin: 15, phases: [{ min: 15, label: 'ลดน้ำหนัก', doctor: true }] },
+      { id: 'face', doctorId: 'gp', name: 'โปรแกรมฉีดหน้า', detail: 'Botox · Fat · Filler · Meso', durationMin: 60, phases: [{ min: 30, label: 'ทายาชา', doctor: false }, { min: 30, label: 'ฉีด', doctor: true }] },
+      { id: 'acu', doctorId: 'tcm', name: 'ฝังเข็ม', detail: 'ใช้เวลาประมาณ 40 นาที', durationMin: 40, phases: [{ min: 40, label: 'ฝังเข็ม', doctor: true }] },
+      { id: 'cupping', doctorId: 'tcm', name: 'ครอบแก้ว', detail: 'ใช้เวลาประมาณ 20 นาที', durationMin: 20, phases: [{ min: 20, label: 'ครอบแก้ว', doctor: true }] },
+      { id: 'guasha', doctorId: 'tcm', name: 'กัวซาหน้าใส + มาสก์หน้าสมุนไพรจีน', detail: 'ใช้เวลาประมาณ 1 ชั่วโมง', durationMin: 60, phases: [{ min: 60, label: 'กัวซาหน้าใส + มาสก์หน้าสมุนไพรจีน', doctor: true }] },
+      { id: 'tcm_followup', doctorId: 'tcm', name: 'Follow up', detail: 'ใช้เวลาประมาณ 15 นาที', durationMin: 15, slotStepMin: 15, adminOnly: true, phases: [{ min: 15, label: 'Follow up', doctor: true }] },
+    ],
+  },
+  contacts: [
+    { userId: 'U1', displayName: 'Nok 🌷', name: 'ตัวอย่าง นกน้อย', phone: '0812223333', lastSeen: Date.now() - 6 * MIN },
+    { userId: 'U2', displayName: 'Benz', name: '', phone: '', lastSeen: Date.now() - 95 * MIN },
+    { userId: 'U3', displayName: 'คุณแม่มาลี', name: 'ตัวอย่าง มาลี', phone: '0891234567', lastSeen: Date.now() - 26 * 60 * MIN },
+    { userId: 'U4', displayName: 'Tong T.', name: 'ตัวอย่าง ต้องตา', phone: '0865550101', lastSeen: Date.now() - 4 * 1440 * MIN },
+  ],
+  bookings: [],
+};
+function hash(s) { let h = 7; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
+function demoWindows(k, doctorId) {
+  const p = parts(k);
+  if (doctorId === 'tcm') return [2, 4, 6].includes(p.wd) ? [[780, 1080]] : []; // แพทย์แผนจีน อ./พฤ./ส. 13:00–18:00
+  if (p.wd === 0 || hash(k) % 4 === 0) return []; // แพทย์ทั่วไป: วันอาทิตย์และวันที่เข้าเวร ปิด
+  return p.wd % 2 ? [[600, 780], [1020, 1200]] : [[780, 1200]];
+}
+function demoSlots(svc, k) {
+  const step = svc.slotStepMin || (svc.doctorId === 'tcm' ? 60 : 15);
+  const out = [];
+  demoWindows(k, svc.doctorId).forEach(([a, b]) => {
+    for (let t = a; t + svc.durationMin <= b; t += step) {
+      const clash = demo.bookings.some((x) => x.doctorId === svc.doctorId && x.date === k && toMin(x.time) < t + svc.durationMin && toMin(x.endTime) > t);
+      if (!clash && hash(k + t + svc.doctorId) % 10 >= 3) out.push(fromMin(t));
+    }
+  });
+  return out;
+}
+function demoBook(d) {
+  const svc = demo.cfg.services.find((s) => s.id === d.serviceId);
+  const b = { id: 'BK' + Math.random().toString(16).slice(2, 8).toUpperCase(), serviceName: svc.name, doctorId: svc.doctorId,
+    doctorName: demo.cfg.doctors.find((x) => x.id === svc.doctorId).name, date: d.date, dateLabel: dateLabel(d.date),
+    time: d.time, endTime: fromMin(toMin(d.time) + svc.durationMin), canCancel: true, mine: !d.admin };
+  demo.bookings.push(b);
+  return b;
+}
+async function demoApi(action, d) {
+  await new Promise((r) => setTimeout(r, 300));
+  if (action === 'config') return demo.cfg;
+  if (action === 'availability') {
+    const svc = demo.cfg.services.find((s) => s.id === d.serviceId); const days = {};
+    for (let i = 1; i < 30; i++) { const k = addDays(todayKey(), i); const s = demoSlots(svc, k); if (s.length) days[k] = s; }
+    return { days };
+  }
+  if (action === 'book') {
+    if (demo.bookings.filter((b) => b.mine).length >= 2) { const e = new Error('จองล่วงหน้าได้สูงสุด 2 คิว กรุณายกเลิกคิวเดิมก่อน หรือติดต่อคลินิก'); e.code = 'LIMIT'; throw e; }
+    return { booking: demoBook(d), pushed: true };
+  }
+  if (action === 'contacts') {
+    const q = (d.q || '').toLowerCase();
+    return { contacts: demo.contacts.filter((c) => !q || [c.displayName, c.name, c.phone].some((s) => s.toLowerCase().includes(q))) };
+  }
+  if (action === 'adminBook') {
+    const b = demoBook(Object.assign({ admin: true }, d));
+    return { booking: b, pushed: !!d.contactUserId, notified: !!d.contactUserId };
+  }
+  if (action === 'my') return { bookings: demo.bookings.filter((b) => b.mine).sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time)) };
+  if (action === 'cancel') { demo.bookings = demo.bookings.filter((b) => b.id !== d.bookingId); return {}; }
+  throw new Error('unknown action');
+}
+
+boot();
+</script>
+</body>
+</html>
